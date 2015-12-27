@@ -49,8 +49,7 @@
     <input type="submit" value="Generate key">
     <output></output>
   </form>
-  <p>Update folder password by using this code in developer console, where "--- file handler ---" is the
-  code shown in the URL after "#fm/" when the folder is opened:</p>
+  <p>Update folder password by opening folder in MEGA then using this code in developer console:</p>
   <code id="dev-code">[code will be shown after generating key]</code>
   <p>Finally add files to the folder normally and it's done.</p>
   <p><a href="#">More info →</a></p>
@@ -162,7 +161,7 @@
   function showMEGAKey(encryptionKey) {
     encryptionKey = convertKey(encryptionKey);
     document.getElementsByTagName('output')[0].innerHTML = 'Generated key: ' + encryptionKey;
-    document.getElementById('dev-code').innerHTML = "u_sharekeys['--- file handler ---'] = base64_to_a32('" + encryptionKey + "');";
+    document.getElementById('dev-code').innerHTML = "u_sharekeys[page.split('/')[1]] = base64_to_a32('" + encryptionKey + "');";
   }
   
   // Add hanclers and init application:
