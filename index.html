@@ -1,6 +1,8 @@
 <!doctype html>
 <meta charset="utf-8">
 <title>Safe MEGA</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta content="IE=edge" http-equiv="X-UA-Compatible">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
   body{ /* from bettermotherfuckingwebsite.com */
@@ -35,21 +37,23 @@
   <p>Important: this is a proof of concept with the objective of developers implementing this feature in MEGA
   itself and other tools based in MEGA. There isn't an intention of keeping it forever as a developer console
   hack, or even requiring other clients or extensions to be build for that.</p>
-  <p>Code is written in ES6. PBKDF2 is used for key derivation. WebCrypto is required.</p>
+  <p>This page code is written in ES6, so support for it is required. As PBKDF2-SHA-1 is used for key derivation
+  WebCrypto support is also required too.</p>
   <p>For issues and more info <a href="https://github.com/qgustavor/safe-mega">check GitHub page</a>.</p>
 </div>
 <div id="generate-key" class="view">
   <p>MEGA functions can be overwritten using developer tools. So, in order to choose which key is going to be
   used when sharing a folder, and allowing to use an PBKDF2 derived encryption key, developer tools.</p>
   <p>First share a empty folder normally. It will generate an random encryption key.</p>
-  <p>Generate a key based in share handler (it's in the shared URL) and the password of your preference:</p>
+  <p>Generate a key based in share handler (the first part of the shared URL, between exclamations)
+  and the password of your preference:</p>
   <form id="manual-generate">
     <input type="text" placeholder="Handler">
     <input type="password" placeholder="Password">
     <input type="submit" value="Generate key">
     <output></output>
   </form>
-  <p>Update folder password by opening folder in MEGA then using this code in developer console:</p>
+  <p>Update folder password by opening the shared folder in MEGA then using this code in developer console:</p>
   <code id="dev-code">[code will be shown after generating key]</code>
   <p>Finally add files to the folder normally and it's done.</p>
   <p><a href="#">More info →</a></p>
@@ -67,7 +71,7 @@
   let HASH = 'SHA-1'; // for compatibility with Firefox
   let ITERATIONS = 181020; // http://stackoverflow.com/a/14263775 (2015)
 
-  // From https://timtaubert.de/blog/2015/05/implementing-a-pbkdf2-based-password-storage-scheme-for-firefox-os/
+  // Functions from https://timtaubert.de/blog/2015/05/implementing-a-pbkdf2-based-password-storage-scheme-for-firefox-os/
   function getHashOutputLength(hash) {
     switch (hash) {
       case 'SHA-1':   return 160;
@@ -164,7 +168,7 @@
     document.getElementById('dev-code').innerHTML = "u_sharekeys[page.split('/')[1]] = base64_to_a32('" + encryptionKey + "');";
   }
   
-  // Add hanclers and init application:
+  // Add handlers and initialize application:
   window.addEventListener('hashchange', handleViews);
   document.getElementById('auto-generate').addEventListener('submit', handleSubmit);
   document.getElementById('manual-generate').addEventListener('submit', handleManualSubmit);
