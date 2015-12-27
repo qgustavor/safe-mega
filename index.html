@@ -1,0 +1,146 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Safe MEGA</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body{ /* from bettermotherfuckingwebsite.com */
+    margin:40px auto;
+    max-width:650px;
+    line-height:1.6;
+    font-size:18px;
+    color:#444;
+    padding:0 10px
+  }
+  h1,h2,h3{ line-height:1.2 }
+  h1 small{ display: block; }
+  .view { display: none; }
+  .current.view { display: block; }
+  .important { color: #D22; }
+</style>
+<header><h1>Safe MEGA<small>Add passwords to MEGA folders</small></h1></header>
+<div id="main-view" class="current view">
+  <p>MEGA is created to be a end to end encrypted file storage, but it only allows random generated keys.
+  If it increases safety by avoiding unsafe keys in the other hand encourages those keys being shared
+  in plain text.</p>
+  <p>This web application is created to add an interface for passwords for passwords. While file links
+  can't be changed by the user because those links handle both decryption and integrity, in the other
+  handle file links only handles decryption. So it's possible to the user, using <a href="#!generate-key">a
+  simple JavaScript snippet</a> (in future also a browser extension), change the encryption key arbitrarily.</p>
+  <p>While sharing the folder instead of sharing an <code>https://mega.nz/#F!handler!key</code> link,
+  replace it which <code>https://safeme.ga/#handler</code>. After visiting this link, based on typed password,
+  the user will be redirected to MEGA folder with the generated decryption key.</p>
+  <p class="important">It will prevent the decryption key being delivered in plain text by the share link!</p>
+  <p>As it's an single page application both the password and decryption key are never send to any server.
+  For increased security this page works offline and <a download="safemega.html" href=".">can be downloaded</a>.
+  In future all releases are going to be cryptography signed too.</p>
+  <p>Code is written in ES6. PBKDF2 is used for key derivation. WebCrypto is required.</p>
+  <p>For issues and more info <a href="https://github.com/qgustavor/safe-mega">check GitHub page</a>.</p>
+</div>
+<div id="generate-key" class="view">
+  <p>MEGA functions can be overwritten using developer tools. So, in order to choose which key is going to be
+  used when sharing a folder, and allowing to use an PBKDF2 derived encryption key, you can use this code in
+  developer tools:</p>
+  <pre>--- work in progress ---</pre>
+  <p><a href="#">More info →</a></p>
+</div>
+<div id="decryption-view" class="view">
+  <p>Enter password to decrypt folder:</p>
+  <form>
+    <input type="password" placeholder="Password">
+    <input type="submit" value="Decrypt folder">
+  </form>
+  <p><a href="#">More info →</a></p>
+</div>
+
+<script>(function(){'use strict';
+  let HASH = 'SHA-256';
+  let ITERATIONS = 4096;
+
+  // From https://timtaubert.de/blog/2015/05/implementing-a-pbkdf2-based-password-storage-scheme-for-firefox-os/
+  function getHashOutputLength(hash) {
+    switch (hash) {
+      case 'SHA-1':   return 160;
+      case 'SHA-256': return 256;
+      case 'SHA-384': return 384;
+      case 'SHA-512': return 512;
+    }
+
+    throw new Error("Unsupported hash function");
+  }
+  function deriveBits(code, salt, hash, iterations) {
+    // Convert string to a TypedArray.
+    let bytes = new TextEncoder('utf-8').encode(code);
+
+    // Create the base key to derive from.
+    let importedKey = crypto.subtle.importKey(
+      "raw", bytes, "PBKDF2", false, ["deriveBits"]);
+
+    return importedKey.then(key => {
+      // Output length in bits for the given hash function.
+      let hlen = getHashOutputLength(hash);
+
+      // All required PBKDF2 parameters.
+      let params = {name: "PBKDF2", hash: hash, salt:salt, iterations: iterations};
+
+      // Derive |hlen| bits using PBKDF2.
+      return crypto.subtle.deriveBits(params, key, hlen);
+    });
+  }
+  function generateKey(handler, password) {
+    // The salt is the SHA-256 of the handler.
+    let salt = new TextEncoder('utf-8').encode(handler);
+    
+    return crypto.subtle.digest({ name: 'SHA-256' }, salt)
+      .then(salt => deriveBits(password, salt, HASH, ITERATIONS));
+  }
+  let views = [
+    document.getElementById('main-view'),
+    document.getElementById('generate-key'),
+    document.getElementById('decryption-view')
+  ];
+  function handleViews() {
+    views.forEach(e => e.classList.remove('current'));
+    if (location.hash === '#!generate-key') {
+      views[1].classList.add('current');
+    } else if (location.hash.length <= 1) {
+      views[0].classList.add('current');
+    } else {
+      views[2].classList.add('current');
+    }
+  }
+  
+  function handleSubmit(event) {
+    event.preventDefault();
+    generateKey(location.hash.substr(1), document.getElementsByTagName('input')[0].value)
+      .then(redirectToMEGA, handleError);
+  }
+  
+  function handleError(error) {
+    console.error(error);
+  }
+  
+  var base64chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+  function convertKey(arraybuffer) {
+    var bytes = new Uint8Array(arraybuffer).subarray(0, 16),
+    i, len = bytes.length, base64 = "";
+
+    for (i = 0; i < len; i+=3) {
+      base64 += base64chars[bytes[i] >> 2];
+      base64 += base64chars[((bytes[i] & 3) << 4) | (bytes[i + 1] >> 4)];
+      base64 += base64chars[((bytes[i + 1] & 15) << 2) | (bytes[i + 2] >> 6)];
+      base64 += base64chars[bytes[i + 2] & 63];
+    }
+
+    return base64;
+  };
+  
+  function redirectToMEGA(encryptionKey) {
+    let url = 'https://mega.nz/#F!' + location.hash.substr(1) + '!' + convertKey(encryptionKey);
+    location.href = url;
+  }
+  
+  // Add hanclers and init application:
+  window.addEventListener('hashchange', handleViews);
+  document.getElementsByTagName('form')[0].addEventListener('submit', handleSubmit);
+  handleViews();
+}());</script>
