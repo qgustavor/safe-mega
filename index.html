@@ -173,4 +173,9 @@
   document.getElementById('auto-generate').addEventListener('submit', handleSubmit);
   document.getElementById('manual-generate').addEventListener('submit', handleManualSubmit);
   handleViews();
+  
+  // Register service worker to handle .GA to GitHub.io redirect as .GA is free thus not trustworthy:
+  if (navigator.serviceWorker) {
+    navigator.serviceWorker.register('sw.js', {scope: '.'});
+  }
 }());</script>
