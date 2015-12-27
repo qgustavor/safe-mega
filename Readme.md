@@ -2,6 +2,8 @@
 
 A static web application which add passwords to folder links.
 
+[Example folder](https://safeme.ga/#JY5iiJjC) (the password is [her name](http://myanimelist.net/character/7373) lowercased).
+
 ## How it works:
 
 * File links are based in two parts, an handler and an HMAC key merged to a encryption key;
