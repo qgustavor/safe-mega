@@ -1,6 +1,6 @@
 # Safe MEGA
 
-An static webapp which add passwords to folder links.
+A static web application which add passwords to folder links.
 
 ## How it works:
 
@@ -8,9 +8,11 @@ An static webapp which add passwords to folder links.
 * Because the HMAC file links can't be controlled by the user;
 * In the other hand folder links are based in two parts, an handler and the encryption key;
 * As there isn't an HMAC key in folder links the user can use any encryption key possible.
-* Finally this webapp generate an encryption key based in a password and the file handler;
+* Finally this application generate an encryption key based in a password and the file handler;
 
-## Basic issues:
+## Some questions that still need to be resolved:
 
-* How to make the generated encryption key be used when sharing MEGA folder? (maybe an extension based on [this](https://gist.github.com/qgustavor/bf69fd5c849c11f67e1e));
+* How to make easier to the generated encryption key be used when sharing MEGA folder?
 * How to prevent generated encryption key being leaked (to location.hash, browser history and other locations)?
+
+**Fell free to open issues, fork and pull requests!**
