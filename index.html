@@ -165,7 +165,7 @@
   function showMEGAKey(encryptionKey) {
     encryptionKey = convertKey(encryptionKey);
     document.getElementsByTagName('output')[0].innerHTML = 'Generated key: ' + encryptionKey;
-    document.getElementById('dev-code').innerHTML = "u_sharekeys[page.split('/')[1]] = base64_to_a32('" + encryptionKey + "');";
+    document.getElementById('dev-code').innerHTML = "u_sharekeys[page.substr(3)] = base64_to_a32('" + encryptionKey + "');";
   }
   
   // Add handlers and initialize application:
