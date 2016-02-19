@@ -70,10 +70,18 @@
   <p>You're using the extra safe version of Safe MEGA</p>
   <p>All the page code is contained in a Data URI, which can be bookmarked making this page impossible to be updated or took down.</p>
   <p>It means if me (the developer), GitHub (the hosting provider) or the NSA (you know who they are) want to hack you thought this tool it will not me possible.</p>
-  <p>How to use the bookmarked version? Follow <a href="#">the instructions</a> and replace "https://safeme.ga/" with the code below:</p>
+  <p>How to use the bookmarked version? Follow <a href="#">the instructions</a> and replace <code>https://safeme.ga/</code> with the code below:</p>
   <p><textarea id="source-code"></textarea></p>
   <p>Don't worry if it's hard to do, if you're seeing this page is because your browser can handle that for you via Service Workers.</p>
   <p style="color: gray; font-size: 0.5em">(of course the developers from your browser and operating system can still hack you via auto updates. Do you trust "don't be evil"? If it stop working in future blame then.)</p>
+  <p><a href="#">More info →</a></p>
+</div>
+<div id="downloaded-view" class="view">
+  <p>You're using the downloaded version of Safe MEGA</p>
+  <p>You know how it's safe? The entire source code of this application is in control of you!</p>
+  <p><span class="important">But there is has a small problem:</span> usually people link to <code>https://safeme.ga/</code>, not to your download folder.</p>
+  <p>I know, I could write an extension for some browser and publish it somewhere making it easy to be took down and censored...</p>
+  <p>So, what to do? Simple, just add the handler in your browser address bar, like this: <code>https://safeme.ga/#handler</code> → <code>.../safemega.html#handler</code>.
   <p><a href="#">More info →</a></p>
 </div>
 
@@ -125,7 +133,14 @@
       return deriveBits(password, salt, HASH, ITERATIONS);
     });
   }
-  var views = [document.getElementById('main-view'), document.getElementById('generate-key'), document.getElementById('decryption-view'), document.getElementById('safer-view')];
+  var views = [
+    document.getElementById('main-view'),
+    document.getElementById('generate-key'),
+    document.getElementById('decryption-view'),
+    document.getElementById('safer-view'),
+    document.getElementById('downloaded-view')
+  ];
+  var fileInstructionsShown = false;
   function handleViews() {
     views.forEach(function (e) {
       return e.classList.remove('current');
@@ -135,7 +150,12 @@
     } else if (location.hash === '#!extra-safe-version') {
       views[3].classList.add('current');
     } else if (location.hash.length <= 1) {
-      views[0].classList.add('current');
+      if (location.protocol === 'file:' && !fileInstructionsShown) {
+        views[4].classList.add('current');
+        fileInstructionsShown = true;
+      } else {
+        views[0].classList.add('current');
+      }
     } else {
       views[2].classList.add('current');
     }

@@ -66,6 +66,14 @@
   </form>
   <p><a href="#">More info →</a></p>
 </div>
+<div id="downloaded-view" class="view">
+  <p>You're using the downloaded version of Safe MEGA</p>
+  <p>You know how it's safe? The entire source code of this application is in control of you!</p>
+  <p><span class="important">But there is has a small problem:</span> usually people link to <code>https://safeme.ga/</code>, not to your download folder.</p>
+  <p>I know, I could write an extension for some browser and publish it somewhere making it easy to be took down and censored...</p>
+  <p>So, what to do? Simple, just add the handler in your browser address bar, like this: <code>https://safeme.ga/#handler</code> → <code>.../safemega.html#handler</code>.
+  <p><a href="#">More info →</a></p>
+</div>
 
 <script>(function(){'use strict';
   let HASH = 'SHA-1'; // for compatibility with Firefox
@@ -111,14 +119,20 @@
   let views = [
     document.getElementById('main-view'),
     document.getElementById('generate-key'),
-    document.getElementById('decryption-view')
+    document.getElementById('decryption-view'),
+    document.getElementById('downloaded-view')
   ];
   function handleViews() {
     views.forEach(e => e.classList.remove('current'));
     if (location.hash === '#!generate-key') {
       views[1].classList.add('current');
     } else if (location.hash.length <= 1) {
-      views[0].classList.add('current');
+      if (location.protocol === 'file:' && !fileInstructionsShown) {
+        views[3].classList.add('current');
+        fileInstructionsShown = true;
+      } else {
+        views[0].classList.add('current');
+      }
     } else {
       views[2].classList.add('current');
     }
