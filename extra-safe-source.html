@@ -217,5 +217,5 @@
   
   // Update download link:
   var downloadLink = document.getElementById('download-link');
-  downloadLink.href = URL.createObjectURL(new Blob([unescape(location.href.split(';charset=utf-8,')[1])]));
+  downloadLink.href = URL.createObjectURL(new Blob([decodeURIComponent(location.href.split(';charset=utf-8,').slice(1).join(';charset=utf-8,'))]));
 })();</script>
