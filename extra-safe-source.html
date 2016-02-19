@@ -191,4 +191,7 @@
 
   // Update source-code:
   document.getElementById('source-code').textContent = location.href.substr(0, location.href.length-location.hash.length);
+  
+  // Update download link:
+  document.querySelector('a[download]').href=URL.createObjectURL(new Blob([decodeURI(location.href.split(';charset=utf-8,')[1])]));
 })();</script>
