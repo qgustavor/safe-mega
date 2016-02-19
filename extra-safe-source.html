@@ -34,7 +34,7 @@
   the user will be redirected to MEGA folder with the generated decryption key.</p>
   <p class="important">It will prevent the decryption key being delivered in plain text by the share link!</p>
   <p>As it's an single page application both the password and decryption key are never send to any server.
-  For increased security this page works offline and <a download="safemega.html" href=".">can be downloaded</a>.</p>
+  For increased security this page works offline and <a id="download-link" download="safemega.html" href=".">can be downloaded</a>.</p>
   <p>Important: this is a proof of concept with the objective of developers implementing this feature in MEGA
   itself and other tools based in MEGA. There isn't an intention of keeping it forever as a developer console
   hack, or even requiring other clients or extensions to be build for that.</p>
@@ -143,16 +143,19 @@
 
   function handleSubmit(event) {
     event.preventDefault();
-    generateKey(location.hash.substr(1), document.querySelector('#auto-generate input').value).then(redirectToMEGA, handleError);
+    generateKey(location.hash.substr(1), document.querySelector('#auto-generate input').value)
+    .then(redirectToMEGA, handleError);
   }
 
   function handleManualSubmit(event) {
     event.preventDefault();
-    generateKey(document.querySelector('#manual-generate input[type="text"]').value, document.querySelector('#manual-generate input[type="password"]').value).then(showMEGAKey, handleError);
+    generateKey(document.querySelector('#manual-generate input[type="text"]').value, document.querySelector('#manual-generate input[type="password"]').value)
+    .then(showMEGAKey, handleError);
   }
 
   function handleError(error) {
-    console.error(error);
+    alert("Your browser required you to download the offline version before continuing.\nDon't worry, I'm not a bad file, you even can check the my source code, audit me, fell in love with me... well anything, I'm just a HTML file.");
+    downloadLink.click();
   }
 
   var base64chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
@@ -193,5 +196,6 @@
   document.getElementById('source-code').textContent = location.href.substr(0, location.href.length-location.hash.length);
   
   // Update download link:
-  document.querySelector('a[download]').href = URL.createObjectURL(new Blob([unescape(location.href.split(';charset=utf-8,')[1])]));
+  var downloadLink = document.getElementById('download-link');
+  downloadLink.href = URL.createObjectURL(new Blob([unescape(location.href.split(';charset=utf-8,')[1])]));
 })();</script>
