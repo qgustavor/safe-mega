@@ -85,12 +85,12 @@
   <p><a href="#">More info →</a></p>
 </div>
 
-<script>'use strict';
-
-(function () {
+<script>(function () {
   'use strict';
   var HASH = 'SHA-1'; // for compatibility with Firefox
   var ITERATIONS = 181020; // http://stackoverflow.com/a/14263775 (2015)
+  var crypto = window.crypto || window.msCrypto;
+  var useAlternateCrypto = false;
 
   // Functions from https://timtaubert.de/blog/2015/05/implementing-a-pbkdf2-based-password-storage-scheme-for-firefox-os/
   function getHashOutputLength(hash) {
@@ -126,11 +126,23 @@
     });
   }
   function generateKey(handler, password) {
+    // Use Forge when WebCrypto cannot be used:
+    if (useAlternateCrypto) {
+      return alternateGenerateKey(handler, password);
+    }
+  
     // The salt is the SHA-256 of the handler.
     var salt = new TextEncoder('utf-8').encode(handler);
 
     return crypto.subtle.digest({ name: 'SHA-256' }, salt).then(function (salt) {
       return deriveBits(password, salt, HASH, ITERATIONS);
+    });
+  }
+  function alternateGenerateKey(handler, password) {
+    return new Promise(function(resolve) {
+      var salt = forge.md.sha256.create(); salt.update(handler);
+      var key = forge.pkcs5.pbkdf2(password, salt.digest().data, ITERATIONS, 20);
+      resolve(new Uint8Array(key.split('').map(e=>e.charCodeAt(0))));
     });
   }
   var views = [
@@ -218,4 +230,17 @@
   // Update download link:
   var downloadLink = document.getElementById('download-link');
   downloadLink.href = URL.createObjectURL(new Blob([decodeURIComponent(location.href.split(';charset=utf-8,').slice(1).join(';charset=utf-8,'))]));
+  
+  // Handle "problems":
+  crypto.subtle.digest({ name: 'SHA-256' }, new Uint8Array([]))
+  .catch(function () {
+    var script = document.createElement('script');
+    script.src = 'https://cdn.rawgit.com/DavisNT/Public-Key-Pins/4f41a62d31f058b786a43fa6edd68d0789b15083/forge.min.js';
+    script.integrity = 'sha384-76d/tHiSZZ5J1I3WD372Ckse76n7Alp8LS1a6NhYT/ZkEqhdpOGb+NEqYbF/tDHj';
+    script.crossOrigin = 'anonymous';
+    script.onload = function () {
+      useAlternateCrypto = true;
+    };
+    document.head.appendChild(script);
+  });
 })();</script>
