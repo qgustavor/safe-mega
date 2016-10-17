@@ -2,7 +2,10 @@
 
 A static web application which add passwords to folder links.
 
-[Example folder](https://safeme.ga/#JY5iiJjC) (the password is [her name](http://myanimelist.net/character/7373) lowercased).
+~~[Example folder](https://safeme.ga/#tIAGnDCY) (the password is [her name](http://myanimelist.net/character/7373) lowercased).~~
+
+*Problem:* for some reason the example stopped working, also changing folder key isn't being possible
+(maybe only after the link is created).
 
 ## How it works:
 
