@@ -2,14 +2,14 @@
 
 A static web application which add passwords to folder links.
 
-~~[Example folder](https://safeme.ga/#tIAGnDCY) (the password is [her name](http://myanimelist.net/character/7373) lowercased).~~
+[Example folder](https://safeme.ga/#9EUmiIab) (the password is [her name](http://myanimelist.net/character/7373) lowercased).
 
-**WARNING: THIS TOOL STOPPED WORKING!**
+Generate keys for MEGA keys using PBKDF2 then share the folder handler by a non secure channel
+and the password by a secure channel without having problems with hard to type keys.
 
-Seems that MEGA did some changes in their servers making harder to put passwords
-in folders with this tool. Old folders with passwords stopped working. I think the reason
-for that is because they want this feature to be a PRO-only feature.
+Changelog:
 
-I don't like they making a security feature being paid if it only requires changes in
-the client, so I will release a new version of Safe MEGA that solves this problem.
-[For more information check the issue](https://github.com/qgustavor/safe-mega/issues/3).
+* V1.0 (or "no version"): used to require changing the folder key, which isn't allowed
+anymore by MEGA servers. Folders protected by this version stopped working.
+* V2.0: now the folder key is pre-generated, so changing isn't needed. Also dropped
+support for "extra-safe version", which turned to be not safe as expected.

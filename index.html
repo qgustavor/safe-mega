@@ -4,60 +4,116 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta content="IE=edge" http-equiv="X-UA-Compatible">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
-  body{ /* from bettermotherfuckingwebsite.com */
-    margin:40px auto;
-    max-width:650px;
-    line-height:1.6;
-    font-size:18px;
-    color:#444;
-    padding:0 10px
+  body {
+    margin: 40px auto;
+    max-width: 650px;
+    line-height: 1.6;
+    font-size: 18px;
+    color: #222;
+    padding: 0 10px
   }
-  h1,h2,h3{ line-height:1.2 }
-  h1 small, output{ display: block; }
+  @media print {body { max-width: none; } }
+  h1,h2,h3 { line-height:1.2 }
+  h1 small, output { display: block; }
   .view { display: none; }
   .current.view { display: block; }
   .important { color: #D22; }
+  .generate-type { max-height: 0; transition: max-height 1s; overflow: hidden; }
+  input:checked + label { font-weight: bold; }
+  input:checked + label + .generate-type { max-height: 10em; }
+  .version { font-size: 0.5em; position: absolute; top: .5em; right: 1em; color: #888; }
 </style>
+
 <header><h1>Safe MEGA<small>Add passwords to MEGA folders</small></h1></header>
+
+<div class="version">v2.0</div>
+
 <div id="main-view" class="current view">
-  <p>MEGA is created to be a end to end encrypted file storage, but it only allows random generated keys.
-  If it increases safety by avoiding unsafe keys in the other hand encourages those keys being shared
-  in plain text.</p>
-  <p>This web application is created to add an interface for adding passwords for folders. While file links
-  can't be changed by the user because those links handle both decryption and integrity, in the other
-  hand folder links only handles decryption making possible to the user, <a href="#!generate-key">using the
-  developer tools</a>, change the encryption key arbitrarily.</p>
-  <p>While sharing the folder instead of sharing an <code>https://mega.nz/#F!handler!key</code> link,
-  replace it which <code>https://safeme.ga/#handler</code>. After visiting this link, based on typed password,
-  the user will be redirected to MEGA folder with the generated decryption key.</p>
-  <p class="important">It will prevent the decryption key being delivered in plain text by the share link!</p>
-  <p>As it's an single page application both the password and decryption key are never send to any server.
-  For increased security this page works offline and <a download="safemega.html" href=".">can be downloaded</a>.</p>
-  <p>Important: this is a proof of concept with the objective of developers implementing this feature in MEGA
-  itself and other tools based in MEGA. There isn't an intention of keeping it forever as a developer console
-  hack, or even requiring other clients or extensions to be build for that.</p>
-  <p>This page code is written in ES6, so support for it is required. As PBKDF2-SHA-1 is used for key derivation
-  WebCrypto support is also required too.</p>
-  <p>For issues and more info <a href="https://github.com/qgustavor/safe-mega">check GitHub page</a>.</p>
+  <p>MEGA is created to be a end to end encrypted file storage, but for users with free accounts it only
+  allows random keys, which encourages those keys being shared in plain text, reducing security.</p>
+  <p>This web application is created to add an interface for creating links with passwords for folders,
+  <span class="important">preventing the decryption key being delivered in plain text by the share link!</span>
+  What you're waiting? <a href="#!generate-key">Add a password to a folder now!</a></p>
+  <p>Both the password and decryption key are never send to any server, also for increased security this page
+  <a download="safemega.html" href=".">can be downloaded and run offline</a>: don't trust us!
+  <p>Please note that only modern browsers are supported as I don't want anyone using old browsers and
+  having problems because any vulnerability.</p>
+  <em>If anything broke</em> and more info <a href="https://github.com/qgustavor/safe-mega">check the GitHub
+  repository</a>.</p>
 </div>
+
 <div id="generate-key" class="view">
-  <p>MEGA functions can be overwritten using developer tools. So, in order to choose which key is going to be
-  used when sharing a folder, and allowing to use an PBKDF2 derived encryption key, developer tools.</p>
-  <p>First share a empty folder normally. It will generate an random encryption key.</p>
-  <p>Generate a key based in share handler (the first part of the shared URL, between exclamations)
-  and the password of your preference:</p>
-  <form id="manual-generate">
-    <input type="text" placeholder="Handler">
-    <input type="password" placeholder="Password">
-    <input type="submit" value="Generate key">
-    <output></output>
-  </form>
-  <p>Update folder password by opening the shared folder in MEGA then using this code in developer console:</p>
-  <code id="dev-code">[code will be shown after generating key]</code>
-  <p>Finally add files to the folder normally and it's done.</p>
-  <p><a href="#">More info →</a></p>
+  <p>You already shared a MEGA folder? The share link follows this format:</p>
+  <p><code>https://mega.nz/#F!handler!<span class="important">_22_random_characters_</span></code></p>
+  <p>Did you know? Those random characters are generated by your computer and are not send to MEGA servers: it's
+  the encryption key. Being random they are a lot harder to crack than passwords, but are also hard to
+  share and type.</p>
+  <p>What we are going to do now is creating a key based in a password (that can easily shared and typed) and
+  other parameters that you can choose below:</p>
+
+  <input id="generate-type-1" type="radio" name="generate-type" value="1" checked>
+  <label for="generate-type-1" >Password + a unique value</label>
+  <div class="generate-type">
+    <span class="important">Example result: <code>https://safeme.ga/#handler!unique-value</code></span><br>
+    Keep unique value blank for 8 random characters.
+    <form id="manual-generate-1">
+      <input type="text" placeholder="Some unique value">
+      <input type="password" placeholder="Password">
+      <input type="submit" value="Generate key">
+    </form>
+  </div>
+
+  <input id="generate-type-2" type="radio" name="generate-type" value="2">
+  <label for="generate-type-2" >Password + folder info</label>
+  <div class="generate-type">
+    <span class="important">Example result: <code>https://safeme.ga/#handler</code></span><br>
+    <strong>WARNING:</strong> we depend on MEGA API access to get folder info, so even if it's simpler
+    to share this method isn't the recommended.<br>
+    Share the folder and paste the share link below:
+    <form id="manual-generate-2">
+      <input type="text" placeholder="Share link">
+      <input type="password" placeholder="Password">
+      <input type="submit" value="Get folder info">
+    </form>
+  </div>
+
+  <input id="generate-type-3" type="radio" name="generate-type" value="3">
+  <label for="generate-type-3" >Password + a unique value + folder info</label>
+  <div class="generate-type">
+    <span class="important">Example result: <code>https://safeme.ga/#handler!!unique-value</code></span><br>
+    <strong>WARNING:</strong> we depend on MEGA API access to get folder info, so even if it's safer
+    than using just a unique value this method isn't also recommended.<br>
+    Keep unique value blank for 8 random characters.<br>
+    Share the folder and paste the share link below:
+    <form id="manual-generate-3">
+      <input type="text" placeholder="Some unique value">
+      <input type="text" placeholder="Share link">
+      <input type="password" placeholder="Password">
+      <input type="submit" value="Get folder info">
+    </form>
+  </div>
+
+  <div id="after-generated" class="view">
+    <code id="generated-code">[generated key will be shown here]</code>
+
+    <p>If you shared your folder you will need to remove share link before continuing.</p>
+    
+    <p>Now overwrite the random key generation using this code in developer tools:</p>
+    <code id="dev-code">[code will be shown after generating key]</code>
+    
+    <p>Then share your folder again. It will use the new generated key.<br>
+    The link with password is the following one:</p>
+    
+    <code id="generated-link">[link will be shown after generating key]</code>
+    
+    <p>Where "handler" is the same of the last share link you got. Done.</p>
+  </div>
+  
+  <p><a href="#">Return to start page →</a></p>
 </div>
+
 <div id="decryption-view" class="view">
   <p>Enter password to decrypt folder:</p>
   <form id="auto-generate">
@@ -66,68 +122,73 @@
   </form>
   <p><a href="#">More info →</a></p>
 </div>
+
 <div id="downloaded-view" class="view">
-  <p>You're using the downloaded version of Safe MEGA</p>
-  <p>You know how it's safe? The entire source code of this application is in control of you!</p>
-  <p><span class="important">But there is has a small problem:</span> usually people link to <code>https://safeme.ga/</code>, not to your download folder.</p>
-  <p>I know, I could write an extension for some browser and publish it somewhere making it easy to be took down and censored...</p>
-  <p>So, what to do? Simple, just add the handler in your browser address bar, like this: <code>https://safeme.ga/#handler</code> → <code>.../safemega.html#handler</code>.
-  <p><a href="#">More info →</a></p>
+  <p>This is the downloaded version of Safe MEGA. You know how much it's safe?
+  The entire source code of this application is in control of you!</p>
+  <p><span class="important">But there is has a small problem:</span> usually people link to
+  <code>https://safeme.ga/</code>, not to your download folder.</p>
+  <p>So, what to do? Simple, just copy the handler in your browser address bar, like this:
+  <code>https://safeme.ga/#handler</code> → <code>.../safemega.html#handler</code>.</p>
+  <p>By the way, if you think anything broke you can always check the GitHub repository for a new version.
+  Don't forget to verify file signatures if you care about security!</p>
+  <p><a href="#">Understood, go to start page →</a></p>
 </div>
 
 <script>(function(){'use strict';
-  let HASH = 'SHA-1'; // for compatibility with Firefox
-  let ITERATIONS = 181020; // http://stackoverflow.com/a/14263775 (2015)
-
-  // Functions from https://timtaubert.de/blog/2015/05/implementing-a-pbkdf2-based-password-storage-scheme-for-firefox-os/
-  function getHashOutputLength(hash) {
-    switch (hash) {
-      case 'SHA-1':   return 160;
-      case 'SHA-256': return 256;
-      case 'SHA-384': return 384;
-      case 'SHA-512': return 512;
-    }
-
-    throw new Error("Unsupported hash function");
-  }
+  // https://stackoverflow.com/a/14263775
+  // 64000 * Math.pow(2, (2016 - 2012) / 2);
+  const ITERATIONS = 256000;
+  const HASH = 'SHA-512';
+  const HASH_LENGTH = 512;
+  
+  // ---------- KEY GENERATION FUNCTIONS ---------- //
+  // functions from https://timtaubert.de/blog/2015/05/implementing-a-pbkdf2-based-password-storage-scheme-for-firefox-os/
   function deriveBits(code, salt, hash, iterations) {
-    // Convert string to a TypedArray.
-    let bytes = new TextEncoder('utf-8').encode(code);
+    // convert string to a TypedArray
+    const bytes = new TextEncoder('utf-8').encode(code);
 
-    // Create the base key to derive from.
-    let importedKey = crypto.subtle.importKey(
-      "raw", bytes, "PBKDF2", false, ["deriveBits"]);
+    // create the base key to derive from
+    const importedKey = crypto.subtle.importKey(
+      'raw', bytes, 'PBKDF2', false, ['deriveBits']
+    );
 
     return importedKey.then(key => {
-      // Output length in bits for the given hash function.
-      let hlen = getHashOutputLength(hash);
+      // all required PBKDF2 parameters
+      const params = {name: 'PBKDF2', hash, salt, iterations};
 
-      // All required PBKDF2 parameters.
-      let params = {name: "PBKDF2", hash: hash, salt:salt, iterations: iterations};
-
-      // Derive |hlen| bits using PBKDF2.
-      return crypto.subtle.deriveBits(params, key, hlen);
+      // derive |HASH_LENGTH| bits using PBKDF2
+      return crypto.subtle.deriveBits(params, key, HASH_LENGTH);
     });
   }
+
   function generateKey(handler, password) {
-    // The salt is the SHA-256 of the handler.
-    let salt = new TextEncoder('utf-8').encode(handler);
-    
-    return crypto.subtle.digest({ name: 'SHA-256' }, salt)
+    // the salt is the SHA-512 of the handler.
+    const salt = new TextEncoder('utf-8').encode(handler);
+
+    return crypto.subtle.digest({ name: 'SHA-512' }, salt)
       .then(salt => deriveBits(password, salt, HASH, ITERATIONS));
   }
-  let views = [
+
+  // --------- VIEW CONTROLLER FUNCTIONS --------- //
+  const views = [
     document.getElementById('main-view'),
     document.getElementById('generate-key'),
     document.getElementById('decryption-view'),
     document.getElementById('downloaded-view')
   ];
+
+  let fileInstructionsShown = false;
   function handleViews() {
     views.forEach(e => e.classList.remove('current'));
+    
     if (location.hash === '#!generate-key') {
       views[1].classList.add('current');
+    } else if (location.protocol === 'file:' && location.hash === '#!downloaded-info') {
+      views[3].classList.add('current');
     } else if (location.hash.length <= 1) {
       if (location.protocol === 'file:' && !fileInstructionsShown) {
+        location.hash = '#!downloaded-info';
         views[3].classList.add('current');
         fileInstructionsShown = true;
       } else {
@@ -137,59 +198,160 @@
       views[2].classList.add('current');
     }
   }
-  
+
+  // --------- FORM SUBMISSION FUNCTIONS --------- //
   function handleSubmit(event) {
     event.preventDefault();
-    generateKey(location.hash.substr(1), document.querySelector('#auto-generate input').value)
-      .then(redirectToMEGA, handleError);
+    
+    const elements = event.target.elements;
+    elements[1].value = 'Please wait...';
+    
+    const password = elements[0].value;
+    const params = location.hash.substr(1).split('!');
+    const [handler, nonce, extraNonce] = params;
+    const requiresFetch = extraNonce || !nonce;
+    
+    Promise.resolve()
+    .then(() => requiresFetch ? getMEGAFolderInfo(handler).then(info => {
+      return info.h;
+    }) : '')
+    .then(folderNonce => {
+      const finalNonce = [folderNonce, extraNonce || nonce || ''].join('|');
+      return generateKey(finalNonce, password);
+    })
+    .then(key => {
+      location.href = 'https://mega.nz/#F!' + handler + '!' + convertKey(key);
+    })
+    .catch(handleError);
   }
   
-  function handleManualSubmit(event) {
+  const METHOD_TO_ELEMENT = [
+    [0, null, 1],
+    [null, 0, 1],
+    [0, 1, 2],
+  ];
+
+  function handleManualSubmit(event, method) {
     event.preventDefault();
-    generateKey(
-      document.querySelector('#manual-generate input[type="text"]').value,
-      document.querySelector('#manual-generate input[type="password"]').value
-    ).then(showMEGAKey, handleError);
+    
+    const elements = event.target.elements;
+    let [nonce, link, password] = METHOD_TO_ELEMENT[method]
+    .map(index => index !== null ? elements[index].value : null);
+    
+    if (method !== 1 && !nonce) {
+      nonce = randomNonce();
+      elements[0].value = nonce;
+    }
+    
+    Promise.resolve()
+    .then(() => link ? getMEGAFolderInfo(link).then(info => {
+      return info.h;
+    }) : '')
+    .then(folderNonce => {
+      const finalNonce = [folderNonce, nonce || ''].join('|');
+      return generateKey(finalNonce, password);
+    })
+    .then(showMEGAKey)
+    .then(() => {
+      document.getElementById('after-generated').classList.add('current');
+    
+      document.getElementById('generated-link').textContent = 'https://safeme.ga/#handler' +
+      (method === 0 ? '!' + nonce : method === 1 ? '' : '!!' + nonce);
+    })
+    .catch(handleError);
+  }
+  
+  // based on https://github.com/LinusU/base32-encode/blob/master/index.js
+  function randomNonce() {
+    const alphabet = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+    const view = crypto.getRandomValues(new Uint8Array(5));
+    let bits = 0;
+    let value = 0;
+    let output = '';
+
+    for (let i = 0; i < 5; i++) {
+      value = (value << 8) | view[i];
+      bits += 8;
+
+      while (bits >= 5) {
+        output += alphabet[(value >>> (bits - 5)) & 31];
+        bits -= 5;
+      }
+    }
+
+    if (bits > 0) {
+      output += alphabet[(value << (5 - bits)) & 31];
+    }
+
+    return output;
   }
   
   function handleError(error) {
-    console.error(error);
+    alert('An error happened: ' + error + '\nCheck project page to get help.');
+    throw error;
   }
-  
-  var base64chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
-  function convertKey(arraybuffer) {
-    var bytes = new Uint8Array(arraybuffer),
-    i, len = bytes.length, base64 = '';
 
-    for (i = 0; i < len; i+=3) {
-      base64 += base64chars[bytes[i] >> 2];
-      base64 += base64chars[((bytes[i] & 3) << 4) | (bytes[i + 1] >> 4)];
-      base64 += base64chars[((bytes[i + 1] & 15) << 2) | (bytes[i + 2] >> 6)];
-      base64 += base64chars[bytes[i + 2] & 63];
+  // --------- MEGA SPECIFIC FUNCTIONS --------- //
+  // From MEGA's a32_to_base64:
+  function convertKey(arrayBuffer) {
+    var a = new Int32Array(arrayBuffer).slice(0, 4);
+    var b = '';
+
+    for (var i = 0; i < a.length * 4; i++) {
+      // copied because I don't understand the next line...
+      b = b + String.fromCharCode((a[i >> 2] >>> (24 - (i & 3) * 8)) & 255);
     }
 
-    return base64.substr(0, 22);
-  };
-  
-  function redirectToMEGA(encryptionKey) {
-    let url = 'https://mega.nz/#F!' + location.hash.substr(1) + '!' + convertKey(encryptionKey);
-    location.href = url;
+    return btoa(b).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
   }
-  
+
   function showMEGAKey(encryptionKey) {
     encryptionKey = convertKey(encryptionKey);
-    document.getElementsByTagName('output')[0].innerHTML = 'Generated key: ' + encryptionKey;
-    document.getElementById('dev-code').innerHTML = "u_sharekeys[page.substr(3)] = base64_to_a32('" + encryptionKey + "');";
+    
+    document.getElementById('generated-code').textContent = 'Generated key: ' + encryptionKey;
+    document.getElementById('dev-code').textContent = `
+      {const q = base64_to_a32('_key_'), _rand = rand;
+      rand = n => q.shift() || _rand.apply(null, arguments); }
+    `.replace(/\s*\n\s*/g, '\n').trim().replace('_key_', encryptionKey);
   }
-  
+
+  function getMEGAFolderInfo(handlerOrUrl) {
+    const urlMath = handlerOrUrl.match(/^https?:\/\/mega\.(?:co\.)?nz\/#F!([^!]+)/i);
+    const handler = urlMath ? urlMath[1] : handlerOrUrl;
+
+    return fetch('https://eu.api.mega.co.nz/cs?n=' + handler, {
+      method: 'post',
+      mode: 'cors',
+      headers: {
+        'content-type': 'application/json;charset=UTF-8'
+      },
+      body: '[{"a":"f","c":1,"r":1}]'
+    })
+    .then(response => {
+      if (response.status !== 200) {
+        throw Error('HTTP error ' + response.status);
+      }
+      return response.json();
+    })
+    .then(response => {
+      if (!Array.isArray(response)) {
+        throw Error('MEGA API error ' + response);
+      }
+
+      return response[0];
+    });
+  }
+
+  // ------------ INIT APP LOGIC ------------ //
   // Add handlers and initialize application:
   window.addEventListener('hashchange', handleViews);
   document.getElementById('auto-generate').addEventListener('submit', handleSubmit);
-  document.getElementById('manual-generate').addEventListener('submit', handleManualSubmit);
-  handleViews();
-  
-  // Register service worker to handle .GA to GitHub.io redirect as .GA is free thus not trustworthy:
-  if (navigator.serviceWorker) {
-    navigator.serviceWorker.register('sw.js', {scope: '.'});
+
+  for (let i = 0; i < 3; i++) {
+    document.getElementById('manual-generate-' + (i + 1)).addEventListener('submit', function (event) {
+      handleManualSubmit(event, i);
+    });
   }
+  
+  handleViews();
 }());</script>
