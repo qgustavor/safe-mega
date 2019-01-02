@@ -2,7 +2,7 @@
 
 A static web application which add passwords to folder links.
 
-[Example folder](https://safeme.ga/#9EUmiIab) (the password is [her name](https://myanimelist.net/character/7373) lowercased).
+[Example folder](https://qgustavor.github.io/safe-mega/#9EUmiIab) (the password is [her name](https://myanimelist.net/character/7373) lowercased).
 
 Generate keys for MEGA keys using PBKDF2 then share the folder handler by a non secure channel
 and the password by a secure channel without having problems with hard to type keys.
